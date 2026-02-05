@@ -1,0 +1,512 @@
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            color: #eee;
+        }
+
+        /* Effet scanline rétro */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%,
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.3;
+        }
+
+        /* Particules d'ambiance */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 550px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-card {
+            background: linear-gradient(145deg, #2d2d44 0%, #1f1f35 100%);
+            border-radius: 20px;
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid #e94560;
+            box-shadow:
+                0 0 20px rgba(233, 69, 96, 0.5),
+                inset 0 0 20px rgba(0, 0, 0, 0.5),
+                0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* LED clignotante en haut */
+        .profile-card::before {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ff6b6b 0%, #c0392b 100%);
+            border-radius: 50%;
+            border: 3px solid #2d2d44;
+            box-shadow:
+                0 0 10px #ff6b6b,
+                inset -2px -2px 4px rgba(0,0,0,0.3);
+            animation: blink 2s infinite;
+            z-index: 10;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-top: 10px;
+        }
+
+        .pokeball-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 25px;
+            position: relative;
+            filter: drop-shadow(0 0 10px rgba(233, 69, 96, 0.5));
+            animation: rotate 8s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pokeball-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(135deg, #e94560 0%, #c0392b 100%);
+            border-radius: 80px 80px 0 0;
+            border: 3px solid #0a0a0f;
+            border-bottom: none;
+        }
+
+        .pokeball-icon::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #ddd 100%);
+            border: 3px solid #0a0a0f;
+            border-radius: 0 0 80px 80px;
+            border-top: none;
+        }
+
+        .pokeball-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            border: 4px solid #0a0a0f;
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .pokeball-center::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border: 3px solid #0a0a0f;
+            border-radius: 50%;
+        }
+
+        .pokeball-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #0a0a0f;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        h1 {
+            color: #e94560;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow:
+                2px 2px 0px #0a0a0f,
+                0 0 10px rgba(233, 69, 96, 0.5);
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: "▮";
+            position: absolute;
+            right: -15px;
+            animation: cursor 1s infinite;
+        }
+
+        @keyframes cursor {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Écran interne style CRT */
+        .screen-border {
+            background: #0a0a0f;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 3px solid #333;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Messages flash */
+        .flash-messages {
+            margin-bottom: 25px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 0.65rem;
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+            border: 2px solid;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border-color: #2ecc71;
+        }
+
+        .alert-error {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border-color: #e74c3c;
+        }
+
+        .alert::before {
+            content: '⚠';
+            font-size: 16px;
+        }
+
+        .alert-success::before {
+            content: '✓';
+        }
+
+        /* Formulaire */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #e94560;
+            font-weight: normal;
+            margin-bottom: 10px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 15px 45px 15px 15px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-family: 'Press Start 2P', cursive;
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, #1a1a2e 0%, #0f0f1e 100%);
+            color: #fff;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #e94560;
+            box-shadow:
+                inset 0 2px 4px rgba(0,0,0,0.5),
+                0 0 15px rgba(233, 69, 96, 0.3);
+        }
+
+        input::placeholder {
+            color: #555;
+            font-size: 0.6rem;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #e94560;
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        .helper-text {
+            font-size: 0.55rem;
+            color: #666;
+            margin-top: 8px;
+            font-style: normal;
+            line-height: 1.6;
+        }
+
+        /* Boutons */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 15px 20px;
+            border: 3px solid #333;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: normal;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-family: 'Press Start 2P', cursive;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 6px 0 #222;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(145deg, #e94560 0%, #c0392b 100%);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 #8b2635;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, #3498db 0%, #2980b9 100%);
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 #1a5276;
+        }
+
+        .btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 #222;
+        }
+
+        /* Boutons décoratifs du Pokédex */
+        .dex-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 25px 0;
+        }
+
+        .dex-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid #333;
+            box-shadow:
+                0 4px 0 #222,
+                inset 0 2px 4px rgba(255,255,255,0.3);
+        }
+
+        .dex-btn.blue {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+        .dex-btn.green {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+        .dex-btn.yellow {
+            background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+        }
+
+        /* Footer */
+        .card-footer {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #333;
+            text-align: center;
+        }
+
+        .back-link {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.6rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link:hover {
+            color: #e94560;
+            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .profile-card {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 0.9rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                min-width: 100%;
+            }
+
+            input[type="text"],
+            input[type="email"],
+            input[type="password"] {
+                font-size: 0.65rem;
+            }
+
+            .helper-text {
+                font-size: 0.5rem;
+            }
+        }
+
+        /* Animation d'entrée */
+        @keyframes slideInCard {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-card {
+            animation: slideInCard 0.6s ease-out;
+        }

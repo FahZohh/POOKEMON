@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Menu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Menu</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/userMenu.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Vidéo de fond -->
+    <video id="bg-video" autoplay loop playsinline>
+        <source src="/static/video/pixel-loop.vid.mp4" type="video/mp4">
+        Votre navigateur ne supporte pas la vidéo.
+    </video>
+
+    <!-- Contrôle de volume -->
+    <div id="volume-box">
+        <label for="volume-slider">Vol</label>
+        <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="0">
+    </div>
+
+    <!-- Flash messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Contenu principal -->
+    <h1>      </h1>
+    <div class="container">
+        <form action="{{ url_for('fight.battleStart') }}" method="get">
+            <button type="submit">Combattre</button>
+        </form>
+        <form action="{{ url_for('userMenu.inventoryPokemons') }}" method="get">
+            <button type="submit">Pokémons</button>
+        </form>
+        <form action="{{ url_for('home') }}" method="get">
+            <button type="submit">Accueil</button>
+        </form>
+    </div>
+
+    <script>
+        // Gestion du volume
+        const video = document.getElementById('bg-video');
+        const slider = document.getElementById('volume-slider');
+
+        slider.addEventListener('input', () => {
+            video.volume = slider.value;
+            video.muted = slider.value == 0;
+        });
+
+        // Initialisation mute par défaut
+        video.volume = 0;
+        video.muted = true;
+    </script>
+</body>
+</html>

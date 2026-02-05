@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil - Pokémon</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <!-- Particules d'ambiance -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 2.5s;"></div>
+    </div>
+
+    <div class="container">
+        <div class="profile-card">
+            <!-- En-tête du profil -->
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <div class="pokeball-avatar">
+                        <div class="pokeball-line"></div>
+                        <div class="pokeball-center"></div>
+                    </div>
+                </div>
+                <h1 class="profile-name">{{ player.username }}</h1>
+                <p class="profile-title">Dresseur Pokemon</p>
+            </div>
+
+            <!-- Corps du profil -->
+            <div class="profile-body">
+                <!-- Messages Flash -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Section Statistiques -->
+                <div class="stats-section">
+                    <h2 class="section-title">Statistiques</h2>
+                    <div class="stats-grid">
+                        <div class="stat-box" style="--progress: {{ (player.wins / (player.wins + player.losses + 1)) * 100 }}%">
+                            <div class="stat-value">{{ player.wins }}</div>
+                            <div class="stat-label">Victoires</div>
+                        </div>
+                        <div class="stat-box" style="--progress: {{ (player.losses / (player.wins + player.losses + 1)) * 100 }}%">
+                            <div class="stat-value">{{ player.losses }}</div>
+                            <div class="stat-label">Defaites</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informations du compte -->
+                <h2 class="section-title">Informations</h2>
+                <div class="info-card">
+                    <div class="info-row">
+                        <div class="info-icon">👤</div>
+                        <div class="info-content">
+                            <div class="info-label">Pseudo</div>
+                            <div class="info-value">{{ player.username }}</div>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-icon">✉️</div>
+                        <div class="info-content">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">{{ player.email }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Boutons décoratifs -->
+                <div class="dex-buttons">
+                    <div class="dex-btn blue"></div>
+                    <div class="dex-btn green"></div>
+                    <div class="dex-btn yellow"></div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="action-buttons">
+                    <a href="{{ url_for('players.profileEdit') }}" class="btn btn-primary">
+                        Modifier
+                    </a>
+                    <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                        Accueil
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="profile-footer">
+                <a href="{{ url_for('home') }}" class="back-link">← RETOUR</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

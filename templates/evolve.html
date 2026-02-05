@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Évolution - {{ pokemon.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/evolution.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="evolution-container">
+        <h1>EVOLUTION<br>{{ pokemon.name }}</h1>
+
+        <div class="pixel-divider"></div>
+
+        <div class="current-pokemon" data-level="{{ pokemon.level }}">
+            {% if pokemon.isShiny %} <span class="shiny-badge">CHROMATIQUE</span> {% endif %}
+            <div class="pokemon-sprite">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{% if pokemon.isShiny %}shiny/{% endif %}{{ pokemon.id }}.png" alt="{{ pokemon.name }}">
+            </div>
+            <div class="pokemon-name">{{ pokemon.name }}</div>
+        </div>
+
+        <div class="pixel-divider"></div>
+
+        <h2>CHOISIS TON<br>EVOLUTION</h2>
+
+        <form method="POST" action="{{ url_for('evolution.evolve') }}">
+            <div class="evolutions-grid">
+                {% for evolution in evolutions %}
+                <div class="evolution-card">
+                    <input type="radio" name="evolutionId" value="{{ evolution.id }}" id="evo-{{ evolution.id }}">
+                    <label for="evo-{{ evolution.id }}">
+                        {% if pokemon.isShiny %} <span class="shiny-badge">CHROMATIQUE</span> {% endif %}
+                        <div class="pokemon-sprite" style="width: 120px; height: 120px;">
+                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{% if pokemon.isShiny %}shiny/{% endif %}{{ evolution.id }}.png" alt="{{ evolution.name }}">
+                        </div>
+                        <span class="evolution-name">{{ evolution.name }}</span>
+
+                        <div class="stats-comparison">
+                            <div class="stat-row">
+                                <span>PV</span>
+                                <span class="stat-diff {% if evolution.maxHealth >= pokemon.maxHealth %}pos{% else %}neg{% endif %}">
+                                    {{ evolution.maxHealth }} ({% if evolution.maxHealth >= pokemon.maxHealth %}+{% endif %}{{ evolution.maxHealth - pokemon.maxHealth }})
+                                </span>
+                            </div>
+                            <div class="stat-row">
+                                <span>ATT</span>
+                                <span class="stat-diff {% if evolution.pa >= pokemon.pa %}pos{% else %}neg{% endif %}">
+                                    {{ evolution.pa }} ({% if evolution.pa >= pokemon.pa %}+{% endif %}{{ evolution.pa - pokemon.pa }})
+                                </span>
+                            </div>
+                            <div class="stat-row">
+                                <span>VIT</span>
+                                <span class="stat-diff {% if evolution.speed >= pokemon.speed %}pos{% else %}neg{% endif %}">
+                                    {{ evolution.speed }} ({% if evolution.speed >= pokemon.speed %}+{% endif %}{{ evolution.speed - pokemon.speed }})
+                                </span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="competitive-warning">
+                <span class="warning-icon">!</span>
+                <p>ATTENTION : En évoluant, tu libères ton <strong>{{ pokemon.name }}</strong>. Il redevient sauvage et tu <strong>PERDS</strong> tes stats actuelles (niveau, PV) car elles ne sont pas transférées au nouveau spécimen.</p>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" name="action" value="evolve" class="evolve-btn">
+                    CONFIRMER EVOLUTION
+                </button>
+
+                <button type="submit" name="action" value="dontEvolve" class="cancel-btn">
+                    ANNULER
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
