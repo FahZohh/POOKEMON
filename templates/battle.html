@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>PokéFight</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/battle.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <video id="bg-video" autoplay loop muted playsinline>
+        <source src="{{ url_for('static', filename='video/background2.mp4') }}" type="video/mp4">
+    </video>
+
+    <audio id="bg-music" loop>
+        <source src="{{ url_for('static', filename='video/music2.mp3') }}" type="audio/mpeg">
+    </audio>
+
+    <div id="volume-box">
+        <label for="volume-slider">Vol</label>
+        <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="0.3">
+    </div>
+
+    <div id="modalOverlay" onclick="closeSwapModal()" {% if forceSwap %}class="force-swap"{% endif %}></div>
+
+    <div id="swapModal" {% if forceSwap %}class="force-swap"{% endif %}>
+        <h3>
+            {% if forceSwap %}
+                Votre Pokémon est KO ! Choisissez-en un autre !
+            {% else %}
+                Choisir un Pokémon
+            {% endif %}
+        </h3>
+        <div class="pokemon-grid">
+            {% for poke in playerPokemons %}
+                {% set is_ko = poke.currentHealth <= 0 %}
+                {% set isCurrent = (poke.id == player.id) and not is_ko %}
+                {% set hpPercent = (poke.currentHealth / poke.maxHealth * 100) | int %}
+                {% set hpClass = 'ko' if is_ko else 'low' if hpPercent < 25 else 'medium' if hpPercent < 50 else 'high' %}
+
+                <div class="pokemon-option {% if isCurrent or is_ko %}disabled{% endif %}"
+                     onclick="{% if not isCurrent and not is_ko %}selectSwapPokemon({{ poke.id }}){% endif %}">
+                    {% if poke.isShiny and poke.spriteChromatiqueFace %}
+                        <img src="{{ poke.spriteChromatiqueFace }}" alt="{{ poke.name }}">
+                    {% elif poke.isShiny %}
+                        <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/{{ poke.id }}.png' alt="{{ poke.name }}">
+                    {% elif poke.spriteFace %}
+                        <img src="{{ poke.spriteFace }}" alt="{{ poke.name }}">
+                    {% else %}
+                        <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ poke.id }}.png' alt="{{ poke.name }}">
+                    {% endif %}
+                    <p><strong>{{ poke.name }}</strong></p>
+                    <p>Niv. {{ poke.level }}</p>
+                    <p class="hp-indicator {{ hpClass }}">
+                        {% if is_ko %}
+                            KO
+                        {% else %}
+                            {{ poke.currentHealth }}/{{ poke.maxHealth }} HP
+                        {% endif %}
+                    </p>
+                    {% if isCurrent %}
+                        <p style="color: #ffcb05;">⚔️ En combat</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        <button class="btn-close-modal" onclick="closeSwapModal()">Annuler</button>
+    </div>
+
+    <div class="container">
+        <div class="container-inner">
+            <h1>PokéFight</h1>
+            <div class="turn-counter">Tour {{ turn }}</div>
+
+            {% if battleActive %}
+                <div class="turn-indicator {% if phase == 'player' %}turn-player{% else %}turn-ai{% endif %}">
+                    {% if phase == "player" %}
+                        C'est votre tour !
+                    {% else %}
+                        C'est le tour de l'IA...
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="battle-area">
+                <div class="pokemon-card player">
+                    <div class="pokemon-sprite">
+                        {% if player.isShiny and player.spriteChromatiqueFace %}
+                            <img src="{{ player.spriteChromatiqueFace }}" alt="{{ player.name }}">
+                        {% elif player.isShiny %}
+                            <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/{{ player.id }}.png' alt="{{ player.name }}">
+                        {% elif player.spriteFace %}
+                            <img src="{{ player.spriteFace }}" alt="{{ player.name }}">
+                        {% else %}
+                            <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ player.id }}.png' alt="{{ player.name }}">
+                        {% endif %}
+
+                        {% if player.isShiny %}
+                            <span class="shiny-badge">✨ SHINY</span>
+                        {% endif %}
+                    </div>
+                    <h2>{{ player.name }}</h2>
+                    <div class="types">
+                        <span class="type-badge type-{{ player.type1 }}">{{ player.type1 }}</span>
+                        {% if player.type2 %}
+                            <span class="type-badge type-{{ player.type2 }}">{{ player.type2 }}</span>
+                        {% endif %}
+                    </div>
+                    {% set hpPercent = (player.currentHealth / player.maxHealth * 100) | int %}
+                    {% set hpColor = '#4caf50' if hpPercent > 50 else '#ff9800' if hpPercent > 25 else '#f44336' %}
+                    <div class="hp-bar">
+                        <div class="hp-fill" style="width: {{ hpPercent }}%; background: {{ hpColor }};">
+                            {{ player.currentHealth }} / {{ player.maxHealth }} HP
+                        </div>
+                    </div>
+                    <div class="pokemon-stats">
+                        <div class="stat-box"><div class="stat-label">Niveau</div><div class="stat-value">{{ player.level }}</div></div>
+                        <div class="stat-box"><div class="stat-label">Attaque</div><div class="stat-value">{{ player.pa }}</div></div>
+                        <div class="stat-box"><div class="stat-label">Vitesse</div><div class="stat-value">{{ player.speed }}</div></div>
+                        <div class="stat-box"><div class="stat-label">EXP</div><div class="stat-value">{{ player.exp }}/{{ player.necessaryExp }}</div></div>
+                    </div>
+                </div>
+
+                <div class="pokemon-card ai">
+                    <div class="pokemon-sprite">
+                        {% if ai.isShiny and ai.spriteChromatiqueFace %}
+                            <img src="{{ ai.spriteChromatiqueFace }}" alt="{{ ai.name }}">
+                        {% elif ai.isShiny %}
+                            <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/{{ ai.id }}.png' alt="{{ ai.name }}">
+                        {% elif ai.spriteFace %}
+                            <img src="{{ ai.spriteFace }}" alt="{{ ai.name }}">
+                        {% else %}
+                            <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ ai.id }}.png' alt="{{ ai.name }}">
+                        {% endif %}
+                        {% if ai.isShiny %}
+                            <span class="shiny-badge">✨ SHINY</span>
+                        {% endif %}
+                    </div>
+                    <h2>{{ ai.name }}</h2>
+                    <div class="types">
+                        <span class="type-badge type-{{ ai.type1 }}">{{ ai.type1 }}</span>
+                        {% if ai.type2 %}
+                            <span class="type-badge type-{{ ai.type2 }}">{{ ai.type2 }}</span>
+                        {% endif %}
+                    </div>
+                    {% set aiHpPercent = (ai.currentHealth / ai.maxHealth * 100) | int %}
+                    {% set aiHpColor = '#4caf50' if aiHpPercent > 50 else '#ff9800' if aiHpPercent > 25 else '#f44336' %}
+                    <div class="hp-bar">
+                        <div class="hp-fill" style="width: {{ aiHpPercent }}%; background: {{ aiHpColor }};">
+                            {{ ai.currentHealth }} / {{ ai.maxHealth }} HP
+                        </div>
+                    </div>
+                    <div class="pokemon-stats">
+                        <div class="stat-box"><div class="stat-label">Niveau</div><div class="stat-value">{{ ai.level }}</div></div>
+                        <div class="stat-box"><div class="stat-label">Attaque</div><div class="stat-value">{{ ai.pa }}</div></div>
+                        <div class="stat-box"><div class="stat-label">Vitesse</div><div class="stat-value">{{ ai.speed }}</div></div>
+                        <div class="stat-box"><div class="stat-label">EXP</div><div class="stat-value">{{ ai.exp }}/{{ ai.necessaryExp }}</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                {% if battleActive %}
+                    {% if phase == "player" %}
+                        {% if forceSwap %}
+                            <button type="button" class="btn btn-swap" onclick="showSwapModal()" style="width: 100%; font-size: 1.2rem;">
+                                ⚠CHOISIR UN POKÉMON
+                            </button>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('fight.battleAction') }}" id="actionForm" onsubmit="saveMusicState()">
+                                <button type="submit" class="btn btn-attack" name="action" value="attack">Attaquer</button>
+                                <button type="submit" class="btn btn-heal" name="action" value="heal">Soigner</button>
+                                <button type="submit" class="btn btn-catch" name="action" value="catch">Attraper</button>
+                                <button type="button" class="btn btn-swap" onclick="showSwapModal()">Changer</button>
+                            </form>
+                        {% endif %}
+
+                        <form method="POST" action="{{ url_for('fight.battleAction') }}" id="swapForm" style="display:none;">
+                            <input type="hidden" name="action" value="swap">
+                            <input type="hidden" name="swapPokemonId" id="swapPokemonId">
+                        </form>
+                    {% elif phase == "ai" %}
+                        <form method="POST" action="{{ url_for('fight.battleAction') }}" onsubmit="saveMusicState()">
+                            <button type="submit" class="btn btn-ai-turn" name="action" value="aiTurn">Tour de l'IA</button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('fight.battleStart') }}" class="btn btn-new" onclick="localStorage.removeItem('battleMusicTime')">Nouveau combat</a>
+                {% endif %}
+            </div>
+            <div class="actions">
+                <a href="{{ url_for('userMenu.menu') }}" class="btn btn-new" onclick="localStorage.removeItem('battleMusicTime')">Retour au menu</a>
+            </div>
+
+            {% if battleLog %}
+                <div class="battle-log">
+                    <h3>📜 Journal de combat</h3>
+                    {% for entry in battleLog[::-1] %}
+                        <p>{{ entry }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+<script>
+    /* ---------- GESTION AUDIO CONTINUE ---------- */
+    const music = document.getElementById('bg-music');
+    const video = document.getElementById('bg-video');
+    const slider = document.getElementById('volume-slider');
+
+    // Sauvegarde l'état de la musique avant de soumettre un formulaire
+    function saveMusicState() {
+        if (music) {
+            localStorage.setItem('battleMusicTime', music.currentTime);
+        }
+    }
+
+    function setGlobalVolume(v) {
+        v = parseFloat(v);
+        video.volume = v;
+        music.volume = v;
+        video.muted = (v === 0);
+        localStorage.setItem('battleVolume', v);
+    }
+
+    function tryPlayMusic() {
+        const savedTime = localStorage.getItem('battleMusicTime');
+        if (savedTime) {
+            music.currentTime = parseFloat(savedTime);
+        }
+
+        music.play().catch(err => {
+            console.log("Autoplay bloqué, en attente d'interaction.");
+        });
+    }
+
+    // Chargement initial
+    window.addEventListener('load', () => {
+        const savedVol = localStorage.getItem('battleVolume');
+        const initialVol = savedVol !== null ? savedVol : 0.3;
+        slider.value = initialVol;
+        setGlobalVolume(initialVol);
+
+        tryPlayMusic();
+
+        // Débloquer l'audio si le navigateur bloque l'autoplay
+        const unlock = () => {
+            if (music.paused) tryPlayMusic();
+            document.removeEventListener('mousemove', unlock);
+            document.removeEventListener('click', unlock);
+            document.removeEventListener('keydown', unlock);
+        };
+        document.addEventListener('mousemove', unlock);
+        document.addEventListener('click', unlock);
+        document.addEventListener('keydown', unlock);
+
+        {% if forceSwap %}
+        showSwapModal();
+        {% endif %}
+    });
+
+    slider.addEventListener('input', () => setGlobalVolume(slider.value));
+
+    /* ---------- MODAL SWAP POKÉMON ---------- */
+    const isForceSwap = {{ 'true' if forceSwap else 'false' }};
+
+    function showSwapModal() {
+        document.getElementById('swapModal').style.display = 'block';
+        document.getElementById('modalOverlay').style.display = 'block';
+    }
+
+    function closeSwapModal() {
+        if (isForceSwap) return;
+        document.getElementById('swapModal').style.display = 'none';
+        document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    function selectSwapPokemon(pokemonId) {
+        saveMusicState(); // On sauve le temps avant de changer de Pokémon
+        document.getElementById('swapPokemonId').value = pokemonId;
+        document.getElementById('swapForm').submit();
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !isForceSwap) closeSwapModal();
+    });
+</script>
+
+</body>
+</html>

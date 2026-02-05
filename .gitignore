@@ -1,0 +1,11 @@
+# Fichiers de config d'IDE
+.idea/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+#Logs
+*.log
+
+.env

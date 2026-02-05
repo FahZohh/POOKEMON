@@ -34,6 +34,7 @@ Ouvre ton client MySQL et exécute le script de création :
 mysql -u root -p < db.sql
 ```
 #### 3.2 - Migration des données
+Completer la connexion à votre database dans scripMigration.py :
 Exécute les scripts de migration dans l'ordre suivant :
 ```bash
 python scriptMigration.py

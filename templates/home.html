@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>PokéHome</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accueil.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press Start 2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- ========== VIDÉO FOND ========== -->
+    <video id="bg-video" autoplay loop playsinline>
+        <source src="/static/video/pixel-loop.vid.mp4" type="video/mp4">
+        Votre navigateur ne supporte pas la vidéo.
+    </video>
+
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" id="logo-img">
+
+    <div id="volume-box">
+        <label for="volume-slider">Vol</label>
+        <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="0">
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main class="container">
+        <h1 class="logo" id="main-title">PokéHome</h1>
+
+        <nav id="guest-nav" class="btn-group">
+            <a href="#" class="btn" id="btn-login">Connexion</a>
+            <a href="#" class="btn" id="btn-register">Inscription</a>
+        </nav>
+
+        <nav id="user-nav" class="btn-group hidden">
+            <a href="{{ url_for('players.profile') }}" class="btn">Profil</a>
+            <a href="{{ url_for('userMenu.menu') }}" class="btn">Menu</a>
+            <a href="{{ url_for('players.logout') }}" class="btn">Deconnexion</a>
+        </nav>
+    </main>
+
+    <section id="login-panel" class="panel hidden">
+        <h2 class="panel-title">Connexion</h2>
+        <form id="login-form" method="POST" action="{{ url_for('home') }}">
+            <input type="hidden" name="formType" value="login">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Mot de passe" required>
+            <button type="submit" class="btn">Go</button>
+        </form>
+        <button class="btn btn-back back-btn">Retour</button>
+    </section>
+
+    <section id="register-panel" class="hidden">
+        <h2 class="panel-title">Inscription</h2>
+        <form id="register-form" method="POST" action="{{ url_for('home') }}">
+            <input type="hidden" name="formType" value="register">
+            <input type="text" name="name" placeholder="Nom" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <div class="password-field">
+                <input type="password" name="password" id="reg-password" placeholder="Mot de passe" required>
+                <button type="button" id="gen-pwd-btn" class="btn-gen" title="Générer un mot de passe">🔄️</button>
+            </div>
+            <button type="submit" class="btn">Créer</button>
+        </form>
+        <button class="btn btn-back back-btn">Retour</button>
+        <span id="copy-notif" class="notif hidden">Copié !</span>
+    </section>
+
+    <script>
+        const body = document.body;
+        const video = document.getElementById('bg-video');
+        const slider = document.getElementById('volume-slider');
+        const guestNav = document.getElementById('guest-nav');
+        const userNav = document.getElementById('user-nav');
+        const mainTitle = document.getElementById('main-title');
+        const loginPanel = document.getElementById('login-panel');
+        const registerPanel = document.getElementById('register-panel');
+
+        const isLogged = {{ 'true' if session.get('id') else 'false' }};
+        guestNav.classList.toggle('hidden', isLogged);
+        userNav.classList.toggle('hidden', !isLogged);
+
+        slider.addEventListener('input', () => {
+            video.volume = slider.value;
+            video.muted = slider.value == 0;
+        });
+        video.volume = 0;
+
+        function showPanel(panel){
+            body.classList.add('login-active');
+            guestNav.classList.add('hide-login');
+            mainTitle.classList.add('hide-login');
+            panel.classList.remove('hidden');
+            setTimeout(() => panel.classList.add('show'), 10);
+        }
+
+        function hidePanel(panel){
+            panel.classList.remove('show');
+            setTimeout(() => {
+                panel.classList.add('hidden');
+                body.classList.remove('login-active');
+                guestNav.classList.remove('hide-login');
+                mainTitle.classList.remove('hide-login');
+            }, 400);
+        }
+
+        document.getElementById('btn-login').addEventListener('click', e => {
+            e.preventDefault();
+            showPanel(loginPanel);
+        });
+
+        document.getElementById('btn-register').addEventListener('click', e => {
+            e.preventDefault();
+            showPanel(registerPanel);
+        });
+
+        document.querySelectorAll('.back-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                hidePanel(loginPanel);
+                hidePanel(registerPanel);
+            });
+        });
+
+        const genPwdBtn = document.getElementById('gen-pwd-btn');
+        const regPassword = document.getElementById('reg-password');
+        const copyNotif = document.getElementById('copy-notif');
+
+        genPwdBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch("{{ url_for('players.generatePassword') }}");
+                const data = await response.json();
+                const pwd = data.password;
+
+                regPassword.value = pwd;
+                regPassword.type = 'text';
+                setTimeout(() => regPassword.type = 'password', 2000);
+
+                try {
+                    await navigator.clipboard.writeText(pwd);
+                    copyNotif.classList.remove('hidden');
+                    setTimeout(() => copyNotif.classList.add('hidden'), 1500);
+                } catch(err) {
+                    console.log('Presse-papiers non accessible');
+                }
+            } catch(err) {
+                console.error('Erreur génération mot de passe:', err);
+            }
+        });
+    </script>
+</body>
+</html>

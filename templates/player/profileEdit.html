@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier mon profil - Pokemon</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profileEdit.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press Start 2P&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <!-- Particules d'ambiance -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 2.5s;"></div>
+    </div>
+
+    <div class="container">
+        <div class="profile-card">
+            <div class="header">
+                <div class="pokeball-icon">
+                    <div class="pokeball-line"></div>
+                    <div class="pokeball-center"></div>
+                </div>
+                <h1>Modifier Profil</h1>
+                <p class="subtitle">Dresseur {{ player.username }}</p>
+            </div>
+
+            <!-- Messages Flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- Formulaire -->
+            <form method="POST" action="{{ url_for('players.profileEdit') }}">
+                <div class="form-group">
+                    <label for="name">Pseudo</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            value="{{ player.username }}"
+                            placeholder="Votre nom"
+                            required
+                        >
+                        <span class="input-icon">👤</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ player.email }}"
+                            placeholder="votre@email.com"
+                            required
+                        >
+                        <span class="input-icon">✉️</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Nouveau mot de passe"
+                        >
+                        <span class="input-icon">🔒</span>
+                    </div>
+                    <p class="helper-text">Laissez vide pour garder l'actuel</p>
+                </div>
+
+                <!-- Boutons décoratifs -->
+                <div class="dex-buttons">
+                    <div class="dex-btn blue"></div>
+                    <div class="dex-btn green"></div>
+                    <div class="dex-btn yellow"></div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">
+                        Sauver
+                    </button>
+                    <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                        Retour
+                    </a>
+                </div>
+            </form>
+
+            <div class="card-footer">
+                <a href="{{ url_for('home') }}" class="back-link">← ACCUEIL</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

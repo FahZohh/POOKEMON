@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Pokédex</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/viewPokemons.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+
+<body class="page-pokedex">
+    <!-- Messages Flash -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="container">
+        <!-- En-tête -->
+        <div class="header">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo-img">
+            <h1>Mon Pokédex</h1>
+            <p class="subtitle">
+                {% if session.get('username') %}
+                    {{ session.get('username') }}
+                {% else %}
+                    Dresseur
+                {% endif %}
+                - {{ pokemons|length }} Pokémon
+            </p>
+            <a href="{{ url_for('userMenu.menu') }}" class="btn-back">← Retour</a>
+        </div>
+
+        <!-- Grille Pokémon -->
+        <div class="pokedex-grid">
+            {% for p in pokemons %}
+            <div class="pokemon-card" data-pokemon-id="{{ p.id }}">
+                <!-- Sprite avec fallback -->
+                <div class="pokemon-sprite">
+                    {% if p.isShiny and p.spriteChromatiqueFace %}
+                        <img src="{{ p.spriteChromatiqueFace }}" alt="{{ p.name }}" class="sprite-shiny">
+                        <span class="shiny-badge">✨</span>
+                    {% elif p.isShiny %}
+                        <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/{{ p.id }}.png' alt="{{ p.name }}">
+                        <span class="shiny-badge">✨</span>
+                    {% elif p.spriteFace %}
+                        <img src="{{ p.spriteFace }}" alt="{{ p.name }}">
+                    {% else %}
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ p.id }}.png" alt="{{ p.name }}">
+                    {% endif %}
+                </div>
+
+                <!-- Info principale -->
+                <div class="pokemon-info">
+                    <div class="pokemon-name">{{ p.nickname or p.name }}</div>
+                    <div class="pokemon-meta">
+                        <span class="pokemon-level">Niv. {{ p.level }}</span>
+                        {% if p.isShiny %}
+                            <span class="shiny-tag">✨</span>
+                        {% endif %}
+                        {% if p.teamId %}
+                            <span class="team-tag">ÉQUIPE</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Actions en grille -->
+                <div class="pokemon-actions">
+                    <!-- Stats -->
+                    <a href="{{ url_for('userMenu.viewPokemonStats', pokemonId=p.id) }}" class="btn-action btn-stats" title="Voir les stats">
+                        📊
+                    </a>
+
+                    <!-- Soigner -->
+                    <form method="POST" class="action-form">
+                        <input type="hidden" name="action" value="heal">
+                        <input type="hidden" name="pokemonId" value="{{ p.id }}">
+                        <button type="submit" class="btn-action btn-heal" title="Soigner">❤️</button>
+                    </form>
+
+                    <!-- Échanger (seulement si dans l'équipe) -->
+                    {% if p.teamId %}
+                    <form method="POST" class="action-form swap-form">
+                        <input type="hidden" name="action" value="swap">
+                        <input type="hidden" name="pokemonId" value="{{ p.id }}">
+                        <select name="swapWith" class="swap-select" title="Choisir avec qui échanger">
+                            {% for other in pokemons %}
+                                {% if other.teamId and other.id != p.id %}
+                                    <option value="{{ other.id }}">{{ other.nickname or other.name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn-action btn-swap" title="Échanger">🔄</button>
+                    </form>
+                    {% endif %}
+
+                    <!-- Relâcher -->
+                    <form method="POST" class="action-form" onsubmit="return confirm('Relâcher {{ p.nickname or p.name }} ?');">
+                        <input type="hidden" name="action" value="drop">
+                        <input type="hidden" name="pokemonId" value="{{ p.id }}">
+                        <button type="submit" class="btn-action btn-release" title="Relâcher">🗑️</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not pokemons or pokemons|length == 0 %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>Aucun Pokémon</h3>
+            <p>Ton inventaire est vide ! Va capturer des Pokémon.</p>
+            <a href="{{ url_for('fight.battleStart') }}" class="btn-primary">Capturer un Pokémon</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Auto-hide flash
+        setTimeout(() => {
+            document.querySelectorAll('.flash-message').forEach(msg => {
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

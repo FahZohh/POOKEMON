@@ -1,0 +1,303 @@
+:root{
+    --font-main:"Press Start 2P",system-ui;
+    --color-accent:#ffcb05;
+    --color-accent2:#3d75aa;
+    --color-text:#ffffff;
+    --blur-intensity:4px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font-main);overflow:hidden;background:#0b0b1e;color:var(--color-text)}
+
+/* ===== FOND VIDÉO (visible partout sauf dans le container) ===== */
+#bg-video{
+    position:fixed;
+    top:50%;left:50%;
+    min-width:100vw;min-height:100vh;
+    width:auto;height:auto;
+    transform:translate(-50%,-50%);
+    object-fit:cover;
+}
+
+/* ===== VOLUME ===== */
+#volume-box{
+    position:fixed;
+    bottom:20px;left:50%;
+    transform:translateX(-50%);
+    z-index:10;
+    background:rgba(0,0,0,.45);
+    color:#fff;
+    padding:6px 10px;
+    border-radius:6px;
+    font-size:.6rem;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    width:100px;
+    justify-content:center;
+}
+#volume-slider{
+    width:60px;height:4px;cursor:pointer;
+    -webkit-appearance:none;
+    appearance:none;
+    background:rgba(255,255,255,.3);
+    border-radius:2px;
+}
+#volume-slider::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:10px;height:10px;
+    background:var(--color-accent);
+    border-radius:50%;
+}
+#volume-slider::-moz-range-thumb{
+    width:10px;height:10px;
+    background:var(--color-accent);
+    border-radius:50%;border:none;
+}
+
+/* ===== CONTENU COMBAT ===== */
+.container{
+    position:relative;
+    z-index:1;
+    max-width:1200px;
+    margin:2% auto;
+    border:2px solid var(--color-accent);
+    border-radius:20px;
+    overflow:hidden;
+}
+.container-inner{
+    background:rgba(11,11,30,0.75);
+    backdrop-filter:blur(6px);
+    padding:3% 4%;
+    height:100%;
+    border-radius:18px;
+}
+
+h1{
+    text-align:center;
+    font-size:clamp(1.4rem,4vw,2.2rem);
+    color:var(--color-accent);
+    text-shadow:0 0 6px var(--color-accent);
+    margin-bottom:10px;
+}
+
+.turn-counter,.turn-indicator{
+    text-align:center;
+    font-size:1rem;
+    margin-bottom:15px;
+}
+.turn-player{background:linear-gradient(135deg,#e3f2fd,#bbdefb);color:#1976d2;border:3px solid #1976d2;}
+.turn-ai{background:linear-gradient(135deg,#ffebee,#ffcdd2);color:#c62828;border:3px solid #c62828;}
+
+.battle-area{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:30px;
+    margin:20px 0;
+    perspective:1000px;
+}
+
+.pokemon-card{
+    border-radius:15px;
+    padding:20px;
+    border:3px solid;
+    position:relative;
+    overflow:hidden;
+    transition:transform .3s ease;
+}
+.pokemon-card:hover{transform:translateY(-5px);}
+.pokemon-card::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(rgba(255,255,255,0) 50%,rgba(255,255,255,.05) 50%);
+    background-size:100% 4px;
+    animation:scan 6s linear infinite;
+}
+
+@keyframes scan{0%{background-position:0 0}100%{background-position:0 12px}}
+
+.player{background:linear-gradient(135deg,#e3f2fd,#bbdefb);border-color:#1976d2;}
+.ai{background:linear-gradient(135deg,#ffebee,#ffcdd2);border-color:#c62828;}
+
+.pokemon-sprite{text-align:center;margin-bottom:15px;}
+.pokemon-sprite img{width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 5px 15px rgba(0,0,0,.3));animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+.shiny-badge{position:absolute;top:-5px;right:-5px;background:linear-gradient(135deg,#ffd700,#ffed4e);color:#333;padding:4px 8px;border-radius:12px;font-size:.6rem;font-weight:bold;}
+
+.pokemon-card h2{text-align:center;font-size:1.1rem;margin-bottom:10px;}
+
+.types{display:flex;justify-content:center;gap:8px;margin-bottom:10px;}
+.type-badge{padding:4px 10px;color:#fff;border-radius:12px;font-size:.55rem;font-weight:600;text-transform:uppercase;}
+
+.hp-bar{background:#ddd;border-radius:15px;height:20px;overflow:hidden;margin:8px 0;border:2px solid #999;}
+.hp-fill{height:100%;color:#fff;font-size:.6rem;font-weight:bold;display:flex;align-items:center;justify-content:center;transition:width .5s ease;text-shadow:1px 1px 3px rgba(0,0,0,.7);}
+
+.pokemon-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;text-align:center;font-size:.55rem;}
+.stat-box{background:rgba(255,255,255,.5);padding:6px;border-radius:8px;}
+.stat-label{color:#666;text-transform:uppercase;}
+.stat-value{color:#333;margin-top:2px;font-weight:600;}
+
+.actions{text-align:center;margin:20px 0;}
+.btn{
+    padding:12px 25px;
+    border-radius:10px;
+    border:none;
+    font-size:.75rem;
+    font-family:inherit;
+    font-weight:bold;
+    cursor:pointer;
+    margin:0 8px;
+    transition:transform .15s ease,background .25s ease;
+    box-shadow:0 4px 10px rgba(0,0,0,.35);
+    text-transform:uppercase;
+}
+.btn-attack{background:linear-gradient(135deg,#e53935,#ef5350);color:#fff;}
+.btn-heal{background:linear-gradient(135deg,#43a047,#66bb6a);color:#fff;}
+.btn-new{background:linear-gradient(135deg,#1e88e5,#42a5f5);color:#fff;text-decoration:none;display:inline-block;}
+
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:scale(.95);}
+
+.battle-log{
+    margin-top:20px;
+    border:2px solid var(--color-accent);
+    border-radius:15px;
+    padding:15px;
+    max-height:180px;
+    overflow-y:auto;
+    background:rgba(0,0,0,.4);
+    font-size:.55rem;
+    color:var(--color-text);
+}
+.battle-log h3{margin-bottom:10px;color:var(--color-accent);}
+.battle-log p{padding:4px 0;border-left:3px solid var(--color-accent2);padding-left:8px;margin:4px 0;}
+
+/* Scrollbar */
+.battle-log::-webkit-scrollbar{width:6px;}
+.battle-log::-webkit-scrollbar-track{background:rgba(255,255,255,.1);border-radius:3px;}
+.battle-log::-webkit-scrollbar-thumb{background:var(--color-accent);border-radius:3px;}
+
+/* Responsive */
+@media (max-width:768px){
+    .battle-area{grid-template-columns:1fr;gap:20px;}
+    .btn{display:block;margin:8px auto;width:90%;}
+    .pokemon-sprite img{width:100px;height:100px;}
+}
+
+        /* Style pour le modal de swap */
+#swapModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    border: 4px solid #ffcb05;
+    border-radius: 15px;
+    padding: 30px;
+    z-index: 9999;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#swapModal h3 {
+    color: #ffcb05;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+#swapModal.force-swap h3 {
+    color: #f44336;
+}
+
+.pokemon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.pokemon-option {
+    background: rgba(255, 255, 255, 0.1);
+    border: 3px solid #666;
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.pokemon-option:hover {
+    border-color: #ffcb05;
+    background: rgba(255, 203, 5, 0.2);
+    transform: scale(1.05);
+}
+.pokemon-option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.pokemon-option img {
+    width: 96px;
+    height: 96px;
+    image-rendering: pixelated;
+}
+
+.pokemon-option p {
+    color: white;
+    margin: 5px 0;
+    font-size: 0.8rem;
+}
+
+.pokemon-option .hp-indicator {
+    font-weight: bold;
+}
+
+.hp-indicator.high { color: #4caf50; }
+.hp-indicator.medium { color: #ff9800; }
+.hp-indicator.low { color: #f44336; }
+.hp-indicator.ko { color: #666; }
+
+.btn-close-modal {
+    display: block;
+    margin: 20px auto 0;
+    padding: 10px 30px;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8rem;
+}
+
+.btn-close-modal:hover {
+    background: #d32f2f;
+}
+
+/* Cache le bouton annuler en mode forceSwap */
+#swapModal.force-swap .btn-close-modal {
+    display: none;
+}
+
+#modalOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9998;
+}
+
+/* Empêche de fermer le modal en cliquant sur l'overlay en mode forceSwap */
+#modalOverlay.force-swap {
+    pointer-events: none;
+}

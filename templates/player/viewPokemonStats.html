@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/viewPokemonStats.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press Start 2P&display=swap" rel="stylesheet">
+
+<title>Stats du Pokémon</title>
+
+</head>
+<body>
+    <!-- Particules d'ambiance -->
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 80%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 2.5s;"></div>
+    </div>
+
+    <div class="container">
+        <h1>{{ pokemon.nickname or pokemon.name }}</h1>
+
+        <div class="screen-border">
+            <div class="pokemon-sprite">
+                {% if pokemon.isShiny and pokemon.spriteChromatiqueFace %}
+                    <img src="{{ pokemon.spriteChromatiqueFace }}" alt="{{ pokemon.name }}">
+                {% elif pokemon.isShiny %}
+                    <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/{{ pokemon.id }}.png' alt="{{ pokemon.name }}">
+                {% elif pokemon.spriteFace %}
+                    <img src="{{ pokemon.spriteFace }}" alt="{{ pokemon.name }}">
+                {% else %}
+                    <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ pokemon.id }}.png' alt="{{ pokemon.name }}">
+                {% endif %}
+                {% if pokemon.isShiny %}
+                    <p class="shiny">✨ SHINY ✨</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="stats">
+            <div style="--progress: {{ (pokemon.level / 100) * 100 }}%">
+                <strong>NIVEAU:</strong> {{ pokemon.level }}
+            </div>
+            <div style="--progress: {{ (pokemon.currentHealth / pokemon.maxHealth) * 100 }}%">
+                <strong>PV:</strong> {{ pokemon.currentHealth }}/{{ pokemon.maxHealth }}
+            </div>
+            <div style="--progress: {{ (pokemon.pa / 255) * 100 }}%">
+                <strong>ATTAQUE:</strong> {{ pokemon.pa }}
+            </div>
+            <div style="--progress: {{ (pokemon.speed / 255) * 100 }}%">
+                <strong>VITESSE:</strong> {{ pokemon.speed }}
+            </div>
+            <div>
+                <strong>TYPE:</strong>
+                {% if pokemon.type1 %}
+                    <span class="type {{ pokemon.type1|lower }}">{{ pokemon.type1 }}</span>
+                {% endif %}
+                {% if pokemon.type2 %}
+                    <span class="type {{ pokemon.type2|lower }}">{{ pokemon.type2 }}</span>
+                {% endif %}
+            </div>
+            <div style="--progress: {{ (pokemon.exp % 100) }}%">
+                <strong>EXP:</strong> {{ pokemon.exp }}
+            </div>
+        </div>
+
+        <div class="dex-buttons">
+            <div class="dex-btn blue"></div>
+            <div class="dex-btn green"></div>
+            <div class="dex-btn yellow"></div>
+        </div>
+
+        <a href="{{ url_for('userMenu.inventoryPokemons') }}" class="back-link">← RETOUR</a>
+    </div>
+</body>
+</html>

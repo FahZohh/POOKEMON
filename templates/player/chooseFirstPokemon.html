@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choisir son Pokémon</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chooseFirstPokemon.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        .volume-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 2px solid #ffcb05;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        .volume-icon { font-size: 24px; cursor: pointer; user-select: none; }
+        #volume-slider {
+            width: 100px; height: 6px; -webkit-appearance: none; appearance: none;
+            background: linear-gradient(to right, #ffcb05 0%, #ffcb05 30%, #555 30%, #555 100%);
+            border-radius: 5px; outline: none; cursor: pointer;
+        }
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 18px; height: 18px;
+            background: #ffcb05; border: 2px solid #fff; border-radius: 50%;
+        }
+        .volume-percent { color: #ffcb05; font-size: 14px; font-weight: bold; min-width: 35px; text-align: center; }
+    </style>
+</head>
+
+<body class="page-choose-pokemon">
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo-img">
+            <h1>Pokémon</h1>
+            <p class="subtitle">Commence ton aventure, {{ player.username }} !</p>
+            <button type="button" class="btn-reroll" onclick="location.reload();" title="Reroll">🔄</button>
+        </div>
+
+        {% if not has_team %}
+        <div class="team-section">
+            <h2>📝 Nom de ton équipe</h2>
+            <form method="POST" action="{{ url_for('userMenu.chooseFirstPokemon') }}">
+                <input type="hidden" name="action" value="teamName">
+                <div class="team-input-group">
+                    <input type="text" name="teamName" placeholder="Entre le nom de ton équipe..." value="Équipe {{ player.username }}" required maxlength="50">
+                    <button type="submit" class="btn-team">Valider</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="pokemon-section">
+            <h2>⚡ Choisis ton premier Pokémon</h2>
+            <form method="POST" action="{{ url_for('userMenu.chooseFirstPokemon') }}" id="pokemonForm">
+                <input type="hidden" name="action" value="choosePokemon">
+                <input type="hidden" name="pokemonId" id="pokemonId">
+
+                <div class="pokemon-grid">
+                    <div class="pokemon-card" data-pokemon-id="{{ pokemon1.id }}" onclick="selectPokemon({{ pokemon1.id }})">
+                        <div class="pokemon-sprite">
+                            {% if pokemon1.isShiny and pokemon1.spriteChromatiqueFace %}
+                                <img src="{{ pokemon1.spriteChromatiqueFace }}" alt="{{ pokemon1.name }}">
+                            {% elif pokemon1.isShiny %}
+                                <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/{{ pokemon1.id }}.png' alt="{{ pokemon1.name }}">
+                            {% elif pokemon1.spriteFace %}
+                                <img src="{{ pokemon1.spriteFace }}" alt="{{ pokemon1.name }}">
+                            {% else %}
+                                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ pokemon1.id }}.png" alt="{{ pokemon1.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="pokemon-name">{{ pokemon1.name }}</div>
+                        <div class="pokemon-level">Niv. {{ pokemon1.level }}</div>
+                        <div class="pokemon-stats">
+                            <div class="stat"><div class="stat-label">PV</div><div class="stat-value">{{ pokemon1.maxHealth }}</div></div>
+                            <div class="stat"><div class="stat-label">ATQ</div><div class="stat-value">{{ pokemon1.pa }}</div></div>
+                            <div class="stat"><div class="stat-label">VIT</div><div class="stat-value">{{ pokemon1.speed }}</div></div>
+                        </div>
+                        <div class="pokemon-types">
+                            <span class="type-badge type-{{ pokemon1.type1.lower() }}">{{ pokemon1.type1 }}</span>
+                            {% if pokemon1.type2 %}<span class="type-badge type-{{ pokemon1.type2.lower() }}">{{ pokemon1.type2 }}</span>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="pokemon-card" data-pokemon-id="{{ pokemon2.id }}" onclick="selectPokemon({{ pokemon2.id }})">
+                        <div class="pokemon-sprite">
+                            {% if pokemon2.isShiny and pokemon2.spriteChromatiqueFace %}
+                                <img src="{{ pokemon2.spriteChromatiqueFace }}" alt="{{ pokemon2.name }}">
+                            {% elif pokemon2.isShiny %}
+                                <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/{{ pokemon2.id }}.png' alt="{{ pokemon2.name }}">
+                            {% elif pokemon2.spriteFace %}
+                                <img src="{{ pokemon2.spriteFace }}" alt="{{ pokemon2.name }}">
+                            {% else %}
+                                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ pokemon2.id }}.png" alt="{{ pokemon2.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="pokemon-name">{{ pokemon2.name }}</div>
+                        <div class="pokemon-level">Niv. {{ pokemon2.level }}</div>
+                        <div class="pokemon-stats">
+                            <div class="stat"><div class="stat-label">PV</div><div class="stat-value">{{ pokemon2.maxHealth }}</div></div>
+                            <div class="stat"><div class="stat-label">ATQ</div><div class="stat-value">{{ pokemon2.pa }}</div></div>
+                            <div class="stat"><div class="stat-label">VIT</div><div class="stat-value">{{ pokemon2.speed }}</div></div>
+                        </div>
+                        <div class="pokemon-types">
+                            <span class="type-badge type-{{ pokemon2.type1.lower() }}">{{ pokemon2.type1 }}</span>
+                            {% if pokemon2.type2 %}<span class="type-badge type-{{ pokemon2.type2.lower() }}">{{ pokemon2.type2 }}</span>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="pokemon-card" data-pokemon-id="{{ pokemon3.id }}" onclick="selectPokemon({{ pokemon3.id }})">
+                        <div class="pokemon-sprite">
+                            {% if pokemon3.isShiny and pokemon3.spriteChromatiqueFace %}
+                                <img src="{{ pokemon3.spriteChromatiqueFace }}" alt="{{ pokemon3.name }}">
+                            {% elif pokemon3.isShiny %}
+                                <img src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/{{ pokemon3.id }}.png' alt="{{ pokemon3.name }}">
+                            {% elif pokemon3.spriteFace %}
+                                <img src="{{ pokemon3.spriteFace }}" alt="{{ pokemon3.name }}">
+                            {% else %}
+                                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{ pokemon3.id }}.png" alt="{{ pokemon3.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="pokemon-name">{{ pokemon3.name }}</div>
+                        <div class="pokemon-level">Niv. {{ pokemon3.level }}</div>
+                        <div class="pokemon-stats">
+                            <div class="stat"><div class="stat-label">PV</div><div class="stat-value">{{ pokemon3.maxHealth }}</div></div>
+                            <div class="stat"><div class="stat-label">ATQ</div><div class="stat-value">{{ pokemon3.pa }}</div></div>
+                            <div class="stat"><div class="stat-label">VIT</div><div class="stat-value">{{ pokemon3.speed }}</div></div>
+                        </div>
+                        <div class="pokemon-types">
+                            <span class="type-badge type-{{ pokemon3.type1.lower() }}">{{ pokemon3.type1 }}</span>
+                            {% if pokemon3.type2 %}<span class="type-badge type-{{ pokemon3.type2.lower() }}">{{ pokemon3.type2 }}</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit" id="submitBtn" disabled>Je choisis ce Pokémon !</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="volume-control">
+        <span class="volume-icon" id="volume-icon" onclick="toggleMute()">🔉</span>
+        <input type="range" id="volume-slider" min="0" max="100" value="30" step="1">
+        <span class="volume-percent" id="volume-percent">30%</span>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="/static/video/select.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const music = document.getElementById('bg-music');
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumePercent = document.getElementById('volume-percent');
+        const volumeIcon = document.getElementById('volume-icon');
+        let isMusicStarted = false;
+
+        function updateVolume(value) {
+            music.volume = value / 100;
+            volumePercent.textContent = value + '%';
+            volumeIcon.textContent = value == 0 ? '🔇' : (value < 50 ? '🔉' : '🔊');
+            volumeSlider.style.background = `linear-gradient(to right, #ffcb05 0%, #ffcb05 ${value}%, #555 ${value}%, #555 100%)`;
+        }
+
+        function startAudio() {
+            if (!isMusicStarted) {
+                music.play().then(() => {
+                    isMusicStarted = true;
+                    updateVolume(30);
+                    // On enlève les listeners une fois démarré
+                    ['click', 'mousemove', 'keydown', 'touchstart'].forEach(type => {
+                        document.removeEventListener(type, startAudio);
+                    });
+                }).catch(err => console.log("Lecture bloquée par le navigateur..."));
+            }
+        }
+
+        // Ecouteurs pour débloquer l'audio au moindre geste
+        ['click', 'mousemove', 'keydown', 'touchstart'].forEach(type => {
+            document.addEventListener(type, startAudio);
+        });
+
+        function toggleMute() {
+            if (music.volume > 0) { updateVolume(0); volumeSlider.value = 0; }
+            else { updateVolume(30); volumeSlider.value = 30; }
+        }
+
+        volumeSlider.addEventListener('input', (e) => updateVolume(e.target.value));
+
+        function selectPokemon(pokemonId) {
+            startAudio(); // Sécurité : relance au clic si pas encore fait
+            document.querySelectorAll('.pokemon-card').forEach(card => card.classList.remove('selected'));
+            const selectedCard = document.querySelector(`[data-pokemon-id="${pokemonId}"]`);
+            if (selectedCard) selectedCard.classList.add('selected');
+            document.getElementById('pokemonId').value = pokemonId;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        updateVolume(30);
+    </script>
+</body>
+</html>
